@@ -4,24 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciador de Tarefas</title>
+    <!-- Link do Bootstrap e Font Awesome -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #f0f2f5;
+            font-family: 'Arial', sans-serif;
         }
         .navbar {
-            margin-bottom: 30px;
+            background-color: #007bff;
+        }
+        .navbar-brand, .navbar-nav .nav-link {
+            color: white !important;
+        }
+        .navbar-nav .nav-link:hover {
+            background-color: #0056b3;
         }
         .task-card {
-            margin-bottom: 20px;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .task-card:hover {
             transform: scale(1.05);
-        }
-        .task-card .btn {
-            margin-right: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
         .pagination {
             justify-content: center;
@@ -29,6 +34,12 @@
         .task-card .card-title {
             font-size: 1.25rem;
             font-weight: bold;
+        }
+        .form-row select, .form-row input {
+            border-radius: 5px;
+        }
+        .btn {
+            border-radius: 5px;
         }
         .alert {
             transition: opacity 0.5s ease;
@@ -39,20 +50,26 @@
         .alert.hide {
             opacity: 0;
         }
+        .task-action-buttons {
+            margin-top: 10px;
+        }
+        .card-text small {
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Barra de navegação -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <nav class="navbar navbar-expand-lg">
             <a class="navbar-brand" href="/">Gerenciador de Tarefas</a>
             <div class="ml-auto">
                 {% if current_user.is_authenticated %}
-                    <span class="mr-3">Bem-vindo, {{ current_user.username }}!</span>
-                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Sair</a>
+                    <span class="mr-3 text-white">Bem-vindo, {{ current_user.username }}!</span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Sair</a>
                 {% else %}
-                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary">Login</a>
-                    <a href="{{ url_for('register') }}" class="btn btn-outline-success">Cadastro</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-light">Login</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-light">Cadastro</a>
                 {% endif %}
             </div>
         </nav>
@@ -68,7 +85,7 @@
             {% endif %}
         {% endwith %}
 
-        <h1 class="mt-5 text-center">Gerenciador de Tarefas</h1>
+        <h1 class="mt-5 text-center text-primary">Gerenciador de Tarefas</h1>
 
         <!-- Filtro de Pesquisa -->
         <form action="/" method="GET" class="mt-3 mb-4">
@@ -100,14 +117,14 @@
         <div class="row">
             {% for tarefa in tarefas.items %}
             <div class="col-md-4">
-                <div class="card task-card">
+                <div class="card task-card shadow-sm">
                     <div class="card-body">
                         <h5 class="card-title">{{ tarefa.titulo }}</h5>
                         <p class="card-text">{{ tarefa.descricao }}</p>
                         <p class="card-text"><small class="text-muted">Prazo: {{ tarefa.prazo }}</small></p>
                         <p class="card-text"><small class="text-muted">Criada em: {{ tarefa.data_criacao.strftime('%Y-%m-%d') }}</small></p>
                         <p class="card-text"><strong>Status:</strong> {{ tarefa.status }}</p>
-                        <div class="d-flex">
+                        <div class="d-flex task-action-buttons">
                             {% if tarefa.status != 'concluída' %}
                                 <a href="/edit/{{ tarefa.id }}" class="btn btn-warning">
                                     <i class="fas fa-edit"></i> Editar
