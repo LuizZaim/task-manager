@@ -2,9 +2,27 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciador de Tarefas</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            margin-bottom: 30px;
+        }
+        .task-card {
+            margin-bottom: 20px;
+        }
+        .task-card .btn {
+            margin-right: 10px;
+        }
+        .pagination {
+            justify-content: center;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -13,11 +31,11 @@
             <a class="navbar-brand" href="/">Gerenciador de Tarefas</a>
             <div class="ml-auto">
                 {% if current_user.is_authenticated %}
-                    <span>Bem-vindo, {{ current_user.username }}!</span>
-                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger ml-3">Sair</a>
+                    <span class="mr-3">Bem-vindo, {{ current_user.username }}!</span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Sair</a>
                 {% else %}
-                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary ml-3">Login</a>
-                    <a href="{{ url_for('register') }}" class="btn btn-outline-success ml-3">Cadastro</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary">Login</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-success">Cadastro</a>
                 {% endif %}
             </div>
         </nav>
@@ -33,10 +51,10 @@
             {% endif %}
         {% endwith %}
 
-        <h1 class="mt-5">Gerenciador de Tarefas</h1>
+        <h1 class="mt-5 text-center">Gerenciador de Tarefas</h1>
 
         <!-- Filtro de Pesquisa -->
-        <form action="/" method="GET" class="mt-3">
+        <form action="/" method="GET" class="mt-3 mb-4">
             <div class="form-row">
                 <div class="col">
                     <input type="text" class="form-control" name="search" placeholder="Pesquisar tarefa..." value="{{ request.args.get('search', '') }}">
@@ -62,46 +80,38 @@
         </form>
 
         <!-- Exibição de tarefas -->
-        <table class="table mt-3">
-            <thead>
-                <tr>
-                    <th>Título</th>
-                    <th>Descrição</th>
-                    <th>Prazo</th>
-                    <th>Data de Criação</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for tarefa in tarefas.items %}
-                <tr {% if tarefa.status == 'concluída' %}class="table-success"{% endif %}>
-                    <td>{{ tarefa.titulo }}</td>
-                    <td>{{ tarefa.descricao }}</td>
-                    <td>{{ tarefa.prazo }}</td>
-                    <td>{{ tarefa.data_criacao.strftime('%Y-%m-%d') }}</td>
-                    <td>{{ tarefa.status }}</td>
-                    <td>
-                        {% if tarefa.status != 'concluída' %}
-                            <a href="/edit/{{ tarefa.id }}" class="btn btn-warning">
-                                <i class="fas fa-edit"></i> Editar
+        <div class="row">
+            {% for tarefa in tarefas.items %}
+            <div class="col-md-4">
+                <div class="card task-card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ tarefa.titulo }}</h5>
+                        <p class="card-text">{{ tarefa.descricao }}</p>
+                        <p class="card-text"><small class="text-muted">Prazo: {{ tarefa.prazo }}</small></p>
+                        <p class="card-text"><small class="text-muted">Criada em: {{ tarefa.data_criacao.strftime('%Y-%m-%d') }}</small></p>
+                        <p class="card-text"><strong>Status:</strong> {{ tarefa.status }}</p>
+                        <div class="d-flex">
+                            {% if tarefa.status != 'concluída' %}
+                                <a href="/edit/{{ tarefa.id }}" class="btn btn-warning">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <a href="/concluir/{{ tarefa.id }}" class="btn btn-success">
+                                    <i class="fas fa-check"></i> Concluir
+                                </a>
+                            {% else %}
+                                <span class="btn btn-success" disabled>
+                                    <i class="fas fa-check"></i> Concluída
+                                </span>
+                            {% endif %}
+                            <a href="/deletar/{{ tarefa.id }}" class="btn btn-danger ml-2" onclick="return confirm('Tem certeza que deseja excluir esta tarefa?')">
+                                <i class="fas fa-trash"></i> Deletar
                             </a>
-                            <a href="/concluir/{{ tarefa.id }}" class="btn btn-success">
-                                <i class="fas fa-check"></i> Concluir
-                            </a>
-                        {% else %}
-                            <span class="btn btn-success" disabled>
-                                <i class="fas fa-check"></i> Concluída
-                            </span>
-                        {% endif %}
-                        <a href="/deletar/{{ tarefa.id }}" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir esta tarefa?')">
-                            <i class="fas fa-trash"></i> Deletar
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
 
         <!-- Navegação entre páginas -->
         <div class="mt-3">
@@ -124,5 +134,8 @@
             </nav>
         </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
