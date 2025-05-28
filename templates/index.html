@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciador de Tarefas</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Barra de navegação -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="/">Gerenciador de Tarefas</a>
+            <div class="ml-auto">
+                {% if current_user.is_authenticated %}
+                    <span>Bem-vindo, {{ current_user.username }}!</span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger ml-3">Sair</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary ml-3">Login</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-success ml-3">Cadastro</a>
+                {% endif %}
+            </div>
+        </nav>
+
+        <!-- Exibição de mensagens de erro -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="alert alert-danger">
+                {% for category, message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <h1 class="mt-5">Gerenciador de Tarefas</h1>
+
+        <!-- Filtro de Pesquisa -->
+        <form action="/" method="GET" class="mt-3">
+            <div class="form-row">
+                <div class="col">
+                    <input type="text" class="form-control" name="search" placeholder="Pesquisar tarefa..." value="{{ request.args.get('search', '') }}">
+                </div>
+                <div class="col">
+                    <select class="form-control" name="status">
+                        <option value="">Status</option>
+                        <option value="pendente" {% if request.args.get('status') == 'pendente' %}selected{% endif %}>Pendente</option>
+                        <option value="concluída" {% if request.args.get('status') == 'concluída' %}selected{% endif %}>Concluída</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <select class="form-control" name="prazo">
+                        <option value="">Prazo</option>
+                        <option value="atrasada" {% if request.args.get('prazo') == 'atrasada' %}selected{% endif %}>Atrasada</option>
+                        <option value="vencendo" {% if request.args.get('prazo') == 'vencendo' %}selected{% endif %}>Vencendo em 7 dias</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Exibição de tarefas -->
+        <table class="table mt-3">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Descrição</th>
+                    <th>Prazo</th>
+                    <th>Data de Criação</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tarefa in tarefas.items %}
+                <tr {% if tarefa.status == 'concluída' %}class="table-success"{% endif %}>
+                    <td>{{ tarefa.titulo }}</td>
+                    <td>{{ tarefa.descricao }}</td>
+                    <td>{{ tarefa.prazo }}</td>
+                    <td>{{ tarefa.data_criacao.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ tarefa.status }}</td>
+                    <td>
+                        {% if tarefa.status != 'concluída' %}
+                            <a href="/edit/{{ tarefa.id }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            <a href="/concluir/{{ tarefa.id }}" class="btn btn-success">
+                                <i class="fas fa-check"></i> Concluir
+                            </a>
+                        {% else %}
+                            <span class="btn btn-success" disabled>
+                                <i class="fas fa-check"></i> Concluída
+                            </span>
+                        {% endif %}
+                        <a href="/deletar/{{ tarefa.id }}" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir esta tarefa?')">
+                            <i class="fas fa-trash"></i> Deletar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Navegação entre páginas -->
+        <div class="mt-3">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if tarefas.has_prev %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('index', page=tarefas.prev_num) }}">Anterior</a></li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+                    {% endif %}
+
+                    <li class="page-item"><span class="page-link">Página {{ tarefas.page }} de {{ tarefas.pages }}</span></li>
+
+                    {% if tarefas.has_next %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('index', page=tarefas.next_num) }}">Próximo</a></li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">Próximo</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</body>
+</html>
