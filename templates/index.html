@@ -15,12 +15,29 @@
         }
         .task-card {
             margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        .task-card:hover {
+            transform: scale(1.05);
         }
         .task-card .btn {
             margin-right: 10px;
         }
         .pagination {
             justify-content: center;
+        }
+        .task-card .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        .alert {
+            transition: opacity 0.5s ease;
+        }
+        .alert.show {
+            opacity: 1;
+        }
+        .alert.hide {
+            opacity: 0;
         }
     </style>
 </head>
@@ -43,11 +60,11 @@
         <!-- Exibição de mensagens de erro -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <ul class="alert alert-danger">
-                {% for category, message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-                </ul>
+                <div class="alert alert-danger show">
+                    {% for category, message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </div>
             {% endif %}
         {% endwith %}
 
@@ -137,5 +154,12 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Timeout para fechar o alerta de erro após 5 segundos
+        setTimeout(function() {
+            $(".alert").fadeOut("slow");
+        }, 5000);
+    </script>
 </body>
 </html>
